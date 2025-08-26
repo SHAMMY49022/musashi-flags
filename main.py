@@ -5,16 +5,16 @@ import requests
 from flask import Flask, request, redirect
 from threading import Thread
 
-# ===============================================================
-# >> 1. EDIT YOUR SECRETS & CONFIG HERE <<
-# ===============================================================
-BOT_TOKEN = "PASTE_YOUR_BOT_TOKEN_HERE"
-CLIENT_ID = "PASTE_YOUR_CLIENT_ID_HERE"
-CLIENT_SECRET = "PASTE_YOUR_CLIENT_SECRET_HERE"
-REDIRECT_URI = "PASTE_YOUR_REDIRECT_URI_HERE" # You'll get this from your host
-GUILD_ID = "PASTE_YOUR_SERVER_ID_HERE"
-BOT_OWNER_IDS = [PASTE_YOUR_USER_ID_HERE]
-# ===============================================================
+# --- Configuration (Loaded from Environment Variables) ---
+try:
+    BOT_TOKEN = os.environ['BOT_TOKEN']
+    CLIENT_ID = os.environ['CLIENT_ID']
+    CLIENT_SECRET = os.environ['CLIENT_SECRET']
+    REDIRECT_URI = os.environ['REDIRECT_URI']
+    GUILD_ID = int(os.environ['GUILD_ID'])
+except KeyError as e:
+    print(f"FATAL ERROR: The environment variable '{e.args[0]}' is not set.")
+    exit()
 
 # This dictionary maps your Role IDs to unique powers of 2.
 STAFF_ROLE_BITWISE_MAP = {
@@ -58,7 +58,7 @@ async def oauth_callback():
         user_id = int(user_response.json()['id'])
     except requests.RequestException: return "Failed to retrieve user info.", 500
 
-    guild = bot.get_guild(int(GUILD_ID))
+    guild = bot.get_guild(GUILD_ID)
     if not guild: return "Server config error.", 500
 
     member = guild.get_member(user_id)
